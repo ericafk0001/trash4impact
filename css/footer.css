@@ -1,0 +1,33 @@
+.footer {
+  background: var(--color-charcoal);
+  color: var(--color-sand);
+  padding: 4rem 3rem;
+  text-align: center;
+}
+
+.footer-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.footer-logo {
+  font-family: var(--font-accent);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.footer-tagline {
+  font-size: 1.1rem;
+  opacity: 0.85;
+  margin-bottom: 2rem;
+}
+
+.footer-copyright {
+  font-size: 0.9rem;
+  opacity: 0.6;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1rem;
+}

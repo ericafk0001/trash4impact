@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mobile App Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="app.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  </head>
+  <body>
+    <div class="screen">
+      <div class="page-menu">
+        <div class="menu-item active" data-page="home">Home</div>
+        <div class="menu-item" data-page="map">Map</div>
+        <div class="menu-item" data-page="redeem">Redeem</div>
+      </div>
+
+      <div id="home-page" class="page-content active">
+        <div class="header">
+          <div class="header-left">
+            <div class="level-text">Level 14</div>
+          </div>
+          <div class="points-display">2,847 pts</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">127</div>
+            <div class="stat-label">Cleanups</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">#247</div>
+            <div class="stat-label">Global Rank</div>
+          </div>
+          <div class="stat-card featured">
+            <div class="stat-value">$243</div>
+            <div class="stat-label">Earned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">45h</div>
+            <div class="stat-label">Verified</div>
+          </div>
+        </div>
+
+        <div class="rank-section">
+          <div class="rank-label">Next Rank: Platinum</div>
+          <div class="rank-icon">
+            <img src="raccoon gold.png" alt="" />
+          </div>
+          <div class="rank-percentage">67% Complete</div>
+        </div>
+      </div>
+
+      <div id="map-page" class="page-content">
+        <div class="map-container">
+          <div class="map-header">Volunteer Opportunities Near You</div>
+          <button class="refresh-btn" onclick="loadCleanupLocations()">
+            🔄 Refresh Locations
+          </button>
+          <div id="map"></div>
+          <div id="location-content">
+            <div class="loading-spinner">
+              <div class="spinner"></div>
+              <div>Finding nearby locations...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="redeem-page" class="page-content">
+        <div class="redeem-header">
+          <h2 class="redeem-title">Redeem Rewards</h2>
+          <div class="available-points">
+            <div class="points-label">Available Points</div>
+            <div class="points-value">2,847</div>
+          </div>
+        </div>
+
+        <!-- Level-Up Bonus Card -->
+        <div class="levelup-card">
+          <div class="levelup-header">
+            <span class="levelup-icon">⚡</span>
+            <div class="levelup-title">Level Up Bonus</div>
+          </div>
+          <div class="levelup-body">
+            <div class="levelup-info">
+              <div class="levelup-level">Reach Level 15</div>
+              <div class="levelup-reward">+500 Bonus Points</div>
+            </div>
+            <div class="levelup-progress">
+              <div class="levelup-bar">
+                <div class="levelup-fill" style="width: 84%"></div>
+              </div>
+              <div class="levelup-text">153 points to go</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reward Cards Grid -->
+        <div class="rewards-section">
+          <h3 class="section-title">Gift Cards</h3>
+
+          <div class="reward-card">
+            <div class="reward-icon">🛒</div>
+            <div class="reward-info">
+              <div class="reward-name">Amazon</div>
+              <div class="reward-value">$10 Gift Card</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">2,500 pts</div>
+              <button class="redeem-btn">Redeem</button>
+            </div>
+          </div>
+
+          <div class="reward-card">
+            <div class="reward-icon">☕</div>
+            <div class="reward-info">
+              <div class="reward-name">Starbucks</div>
+              <div class="reward-value">$5 Gift Card</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">1,200 pts</div>
+              <button class="redeem-btn">Redeem</button>
+            </div>
+          </div>
+
+          <div class="reward-card">
+            <div class="reward-icon">🍔</div>
+            <div class="reward-info">
+              <div class="reward-name">DoorDash</div>
+              <div class="reward-value">$15 Gift Card</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">3,500 pts</div>
+              <button class="redeem-btn disabled">Redeem</button>
+            </div>
+          </div>
+
+          <div class="reward-card">
+            <div class="reward-icon">🛍️</div>
+            <div class="reward-info">
+              <div class="reward-name">Target</div>
+              <div class="reward-value">$10 Gift Card</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">2,400 pts</div>
+              <button class="redeem-btn">Redeem</button>
+            </div>
+          </div>
+
+          <div class="reward-card">
+            <div class="reward-icon">🎬</div>
+            <div class="reward-info">
+              <div class="reward-name">Netflix</div>
+              <div class="reward-value">1 Month Subscription</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">4,000 pts</div>
+              <button class="redeem-btn disabled">Redeem</button>
+            </div>
+          </div>
+
+          <div class="reward-card">
+            <div class="reward-icon">🎮</div>
+            <div class="reward-info">
+              <div class="reward-name">Steam</div>
+              <div class="reward-value">$10 Gift Card</div>
+            </div>
+            <div class="reward-action">
+              <div class="reward-cost">2,600 pts</div>
+              <button class="redeem-btn">Redeem</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js?v=20260228-1515"></script>
+  </body>
+</html>

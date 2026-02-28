@@ -1,0 +1,87 @@
+.compete {
+  background: var(--color-ivory);
+}
+
+.compete-types {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.compete-card {
+  background: white;
+  padding: 3rem 2rem;
+  border-radius: 20px;
+  border: 2px solid transparent;
+}
+
+.compete-card.featured {
+  background: linear-gradient(135deg, var(--color-forest), var(--color-sage));
+  color: white;
+}
+
+.compete-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(45, 156, 111, 0.15);
+  color: var(--color-emerald);
+  margin-bottom: 1.5rem;
+}
+
+.compete-card.featured .compete-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.compete-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-family: var(--font-accent);
+}
+
+.compete-desc {
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+
+.compete-footer {
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(26, 26, 26, 0.1);
+}
+
+.compete-card.featured .compete-footer {
+  border-top-color: rgba(255, 255, 255, 0.2);
+}
+
+.compete-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  padding: 3rem;
+  background: white;
+  border-radius: 20px;
+}
+
+.feature-item {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-slate);
+}
+
+.feature-item strong {
+  display: block;
+  color: var(--color-forest);
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}

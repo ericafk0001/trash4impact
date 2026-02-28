@@ -1,0 +1,59 @@
+/* ============================================================================
+   SPONSOR BANNER STYLES
+   ============================================================================ */
+
+.sponsor-banner {
+  position: relative;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background: linear-gradient(
+    135deg,
+    var(--color-forest),
+    var(--color-emerald)
+  );
+  color: white;
+  padding: 0.75rem 0;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(26, 77, 46, 0.15);
+}
+
+.sponsor-track {
+  display: flex;
+  width: max-content;
+  animation: scroll 40s linear infinite;
+  will-change: transform;
+}
+
+.sponsor-track:hover {
+  animation-play-state: paused;
+}
+
+.sponsor-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  white-space: nowrap;
+  padding: 0 2rem;
+}
+
+.sponsor-item {
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.95;
+}
+
+.sponsor-divider {
+  font-size: 1.2rem;
+  opacity: 0.4;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

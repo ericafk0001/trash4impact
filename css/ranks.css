@@ -1,0 +1,104 @@
+.ranks {
+  background: var(--color-ivory);
+}
+
+.ranks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.rank-card {
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  opacity: 0;
+  transform: translateY(30px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s ease;
+}
+
+.rank-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rank-card.bronze {
+  border-color: #cd7f32;
+}
+.rank-card.bronze:hover {
+  background: linear-gradient(135deg, #cd7f32, #e8a75d);
+  color: white;
+}
+
+.rank-card.silver {
+  border-color: #c0c0c0;
+}
+.rank-card.silver:hover {
+  background: linear-gradient(135deg, #c0c0c0, #e0e0e0);
+  color: var(--color-charcoal);
+}
+
+.rank-card.gold {
+  border-color: var(--color-amber);
+}
+.rank-card.gold:hover {
+  background: linear-gradient(135deg, var(--color-amber), #f4b85e);
+  color: white;
+}
+
+.rank-card.platinum {
+  border-color: #e5e4e2;
+}
+.rank-card.platinum:hover {
+  background: linear-gradient(135deg, #a8a9ad, #e5e4e2);
+  color: var(--color-charcoal);
+}
+
+.rank-card.diamond {
+  border-color: #b9f2ff;
+}
+.rank-card.diamond:hover {
+  background: linear-gradient(135deg, #00bfff, #b9f2ff);
+  color: white;
+}
+
+.rank-card.master {
+  border-color: #9b59b6;
+}
+.rank-card.master:hover {
+  background: linear-gradient(135deg, #9b59b6, #c39bd3);
+  color: white;
+}
+
+.rank-card.legend {
+  border-color: #ffd700;
+}
+.rank-card.legend:hover {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: var(--color-charcoal);
+}
+
+.rank-tier {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  font-family: var(--font-accent);
+}
+
+.rank-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  opacity: 0.9;
+}
+
+.rank-requirement {
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

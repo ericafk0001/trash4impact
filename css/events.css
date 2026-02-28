@@ -1,0 +1,61 @@
+/* Events Section */
+.events {
+  background: #fafaf0;
+}
+
+.events .section-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+/* Impact Tracking Section */
+.impact {
+  background: white;
+}
+
+.impact .section-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+/* Sponsorships Section */
+.sponsorships {
+  background: white;
+}
+
+.sponsorships .section-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .events .section-container,
+  .impact .section-container,
+  .sponsorships .section-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .impact .section-visual {
+    order: 1;
+  }
+
+  .impact .section-content {
+    order: 2;
+  }
+
+  .sponsorships .section-visual {
+    order: 1;
+  }
+
+  .sponsorships .section-content {
+    order: 2;
+  }
+}

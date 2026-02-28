@@ -1,0 +1,202 @@
+@media (max-width: 1200px) {
+  .hero-headline {
+    font-size: 3.5rem;
+  }
+
+  .section-headline,
+  .section-headline-center {
+    font-size: 3rem;
+  }
+
+  .cta-headline {
+    font-size: 3.5rem;
+  }
+}
+
+@media (max-width: 968px) {
+  .nav-container {
+    padding: 1.25rem 2rem;
+  }
+
+  .nav-links {
+    gap: 1.5rem;
+  }
+
+  .hero {
+    padding: 2rem 2rem 4rem;
+  }
+
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .hero-phone {
+    order: 2;
+    justify-content: center;
+  }
+
+  .phone-mockup {
+    transform: none;
+  }
+
+  .hero-content {
+    order: 1;
+    text-align: center;
+  }
+
+  .hero-headline {
+    font-size: 3rem;
+  }
+
+  .hero-description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .cta-buttons {
+    justify-content: center;
+  }
+
+  .hero-stats {
+    justify-content: center;
+  }
+
+  .section {
+    padding: var(--spacing-lg) 2rem;
+  }
+
+  .mission .section-container,
+  .section-split,
+  .cta-final-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .section-split.reverse .section-split-visual {
+    order: 0;
+  }
+
+  .compete-types {
+    grid-template-columns: 1fr;
+  }
+
+  .compete-card.featured {
+    transform: scale(1);
+  }
+
+  .compete-features {
+    grid-template-columns: 1fr;
+  }
+
+  .sponsor-item {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    padding-top: 60px;
+  }
+
+  .nav-container {
+    padding: 1rem 1.5rem;
+  }
+
+  .logo {
+    font-size: 1.1rem;
+  }
+
+  .hero {
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  .hero-container {
+    gap: 2rem;
+  }
+
+  .hero-headline {
+    font-size: 2.5rem;
+  }
+
+  .section {
+    padding: var(--spacing-lg) 1.5rem;
+  }
+
+  .section-headline,
+  .section-headline-center {
+    font-size: 2.25rem;
+  }
+
+  .cta-headline {
+    font-size: 2.5rem;
+  }
+
+  .hero-description,
+  .section-intro {
+    font-size: 1.1rem;
+  }
+
+  .cta-buttons,
+  .cta-buttons-final {
+    flex-direction: column;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+
+  .nav-links {
+    display: none;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .phone-mockup {
+    width: 280px;
+    height: 570px;
+    transform: none;
+  }
+
+  .ranks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .visual-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-trust {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .contact-content {
+    padding: 0 1rem;
+  }
+
+  .contact-form {
+    gap: 1.5rem;
+  }
+
+  .contact-submit {
+    width: 100%;
+  }
+
+  .sponsor-banner {
+    padding: 0.6rem 0;
+  }
+
+  .sponsor-item {
+    font-size: 0.8rem;
+  }
+
+  .sponsor-content {
+    gap: 1.5rem;
+  }
+}
