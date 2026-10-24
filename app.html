@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mobile App Dashboard</title>
+    <link rel="icon" type="image/png" href="images/racoonicon.png" />
+    <title>Trash4Impact Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,22 +21,25 @@
   <body>
     <div class="screen">
       <div class="page-menu">
-        <div class="menu-item active" data-page="home">Home</div>
-        <div class="menu-item" data-page="map">Map</div>
-        <div class="menu-item" data-page="redeem">Redeem</div>
+        <button class="menu-item active" data-page="home">Home</button>
+        <button class="menu-item" data-page="map">Map</button>
+        <button class="menu-item" data-page="events">Events</button>
+        <button class="menu-item" data-page="redeem">Redeem</button>
+        <a class="menu-home-link" href="index.html">← Site</a>
       </div>
+      <div class="demo-ribbon">DEMO BUILD · PHILADELPHIA</div>
 
       <div id="home-page" class="page-content active">
         <div class="header">
           <div class="header-left">
             <div class="level-text">Level 14</div>
           </div>
-          <div class="points-display">2,847 pts</div>
+          <div class="points-display" data-points>2,847 pts</div>
         </div>
 
         <div class="stats-grid">
           <div class="stat-card">
-            <div class="stat-value">127</div>
+            <div class="stat-value" data-cleanups>127</div>
             <div class="stat-label">Cleanups</div>
           </div>
           <div class="stat-card">
@@ -59,12 +63,16 @@
           </div>
           <div class="rank-percentage">67% Complete</div>
         </div>
+        <div class="upcoming-card">
+          <div><span class="eyebrow">UP NEXT</span><strong>PCDC Chinatown Cleanup</strong><span>Saturday · 9:00 AM · +300 pts</span></div>
+          <button class="small-action" onclick="document.querySelector('[data-page=map]').click()">View map →</button>
+        </div>
       </div>
 
       <div id="map-page" class="page-content">
         <div class="map-container">
-          <div class="map-header">Volunteer Opportunities Near You</div>
-          <button class="refresh-btn" onclick="loadCleanupLocations()">
+          <div class="map-heading"><div><div class="map-header">Volunteer Opportunities Near You</div><span class="updated-label" data-last-updated>Updated 2h ago</span></div><span class="philly-pill">📍 Philadelphia</span></div>
+          <button class="refresh-btn">
             🔄 Refresh Locations
           </button>
           <div id="map"></div>
@@ -73,8 +81,19 @@
               <div class="spinner"></div>
               <div>Finding nearby locations...</div>
             </div>
+
           </div>
         </div>
+      </div>
+
+      <div id="events-page" class="page-content">
+        <div class="events-app-header"><span class="eyebrow">DISCOVER</span><h2>Events near you</h2><p>Three ways to make an impact this weekend.</p></div>
+        <div class="event-filters" role="group" aria-label="Filter events">
+          <button class="event-filter active" data-filter="all">All</button>
+          <button class="event-filter" data-filter="park">Park</button>
+          <button class="event-filter" data-filter="community">Community</button>
+        </div>
+        <div id="events-list" class="demo-events-list"></div>
       </div>
 
       <div id="redeem-page" class="page-content">
