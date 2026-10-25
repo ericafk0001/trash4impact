@@ -1,815 +1,274 @@
-// app.js - Main JavaScript for Volunteer App
-// Version: 2026-02-28-15:15 - Added Redeem page with gift cards and level-up rewards
+const DEMO_CENTER = { lat: 39.9576, lon: -75.1548 };
+const STORAGE_KEY = "trash4impact-demo-state";
+const DEFAULT_STATE = {
+  points: 2847,
+  cleanups: 127,
+  signedUp: [],
+  slots: { pcdc: 4, facts: 6, crane: 8 },
+};
 
-console.log(
-  "%c🔄 APP.JS LOADED - Version 2026-02-28-15:15",
-  "background: #2d9c6f; color: white; padding: 8px; font-size: 14px; font-weight: bold;",
-);
+const PHILLY_DEMO_LOCATIONS = [
+  {
+    id: "facts",
+    name: "FACTS Community Cleanup",
+    type: "school",
+    lat: 39.9590125,
+    lon: -75.15603,
+    address: "1023 Callowhill St, Philadelphia, PA 19123",
+    description: "Help refresh the school garden and prep activity spaces for students.",
+    event: "Saturday, 9:00 AM",
+    points: 250,
+    slotsKey: "facts",
+  },
+  {
+    id: "pcdc",
+    name: "PCDC Chinatown Cleanup",
+    type: "ngo",
+    lat: 39.957634,
+    lon: -75.153671,
+    address: "301-305 N 9th St, Philadelphia, PA 19107",
+    description: "Join neighbors for a two-hour cleanup around Chinatown and the Night Market corridor.",
+    event: "Saturday, 9:00 AM",
+    points: 300,
+    slotsKey: "pcdc",
+  },
+  {
+    id: "crane",
+    name: "Crane Community Center",
+    type: "recreation",
+    lat: 39.9575179,
+    lon: -75.1557648,
+    address: "1001 Vine St, Philadelphia, PA 19107",
+    description: "Support a community garden and help set up supplies for youth programming.",
+    event: "Sunday, 10:30 AM",
+    points: 200,
+    slotsKey: "crane",
+  },
+];
 
-// Page switching functionality
-const menuItems = document.querySelectorAll(".menu-item");
-const pages = document.querySelectorAll(".page-content");
-let userLocation = null;
+const DEMO_EVENTS = [
+  { id: "pcdc", icon: "🤝", title: "PCDC Chinatown Cleanup", type: "park", date: "Sat, Mar 7 · 9:00 AM", place: "301 N 9th St", points: 300 },
+  { id: "facts", icon: "🏫", title: "FACTS School Garden Day", type: "community", date: "Sat, Mar 7 · 9:00 AM", place: "1023 Callowhill St", points: 250 },
+  { id: "crane", icon: "🌳", title: "Crane Center Green Team", type: "park", date: "Sun, Mar 8 · 10:30 AM", place: "1001 Vine St", points: 200 },
+];
+
+let state = loadState();
 let map = null;
 let markers = [];
+let currentLocations = [];
 
-menuItems.forEach((item) => {
-  item.addEventListener("click", () => {
-    const targetPage = item.getAttribute("data-page");
-
-    // Remove active class from all menu items
-    menuItems.forEach((mi) => mi.classList.remove("active"));
-
-    // Add active class to clicked menu item
-    item.classList.add("active");
-
-    // Hide all pages
-    pages.forEach((page) => page.classList.remove("active"));
-
-    // Show target page
-    document.getElementById(targetPage + "-page").classList.add("active");
-
-    // Load locations when Map page is opened
-    if (targetPage === "map") {
-      setTimeout(() => {
-        if (!map) initMap();
-        loadCleanupLocations();
-      }, 100);
-    }
-  });
-});
-
-// Get user's location
-function getUserLocation() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      console.log("Geolocation not supported, using default location");
-      userLocation = { lat: 39.9526, lon: -75.1652 };
-      resolve(userLocation);
-      return;
-    }
-
-    console.log("Requesting geolocation...");
-    const timeout = setTimeout(() => {
-      console.log("Geolocation timeout, using default location");
-      userLocation = { lat: 39.9526, lon: -75.1652 };
-      resolve(userLocation);
-    }, 5000); // 5 second timeout for geolocation
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        clearTimeout(timeout);
-        userLocation = {
-          lat: position.coords.latitude,
-          lon: position.coords.longitude,
-        };
-        console.log("Got user location:", userLocation);
-        console.log(
-          `Location check: Lat=${userLocation.lat}, Lon=${userLocation.lon}`,
-        );
-
-        // Sanity check - warn if location seems wrong
-        if (userLocation.lat > 50 || userLocation.lat < 25) {
-          console.warn(
-            "⚠️ WARNING: Latitude outside US range! Location might be wrong.",
-          );
-        }
-        if (userLocation.lon > -65 || userLocation.lon < -125) {
-          console.warn(
-            "⚠️ WARNING: Longitude outside US range! Location might be wrong.",
-          );
-        }
-
-        resolve(userLocation);
-      },
-      (error) => {
-        clearTimeout(timeout);
-        // Use default location (Philadelphia) if geolocation fails
-        userLocation = { lat: 39.9526, lon: -75.1652 };
-        console.log(
-          "Geolocation error:",
-          error.message,
-          "- Using default location (Philadelphia)",
-        );
-        resolve(userLocation);
-      },
-    );
-  });
+function loadState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+    return saved ? { ...DEFAULT_STATE, ...saved, slots: { ...DEFAULT_STATE.slots, ...saved.slots } } : { ...DEFAULT_STATE, slots: { ...DEFAULT_STATE.slots } };
+  } catch (error) {
+    console.warn("Unable to load demo state; starting fresh.", error);
+    return { ...DEFAULT_STATE, slots: { ...DEFAULT_STATE.slots } };
+  }
 }
 
-// Initialize Leaflet map
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  updateUserStats();
+}
+
+function updateUserStats() {
+  document.querySelectorAll("[data-points]").forEach((element) => {
+    element.textContent = `${state.points.toLocaleString()} pts`;
+  });
+  document.querySelectorAll("[data-cleanups]").forEach((element) => {
+    element.textContent = state.cleanups;
+  });
+  const pointsValue = document.querySelector(".points-value");
+  if (pointsValue) pointsValue.textContent = state.points.toLocaleString();
+}
+
+function showToast(message, tone = "success") {
+  const existing = document.querySelector(".app-toast");
+  if (existing) existing.remove();
+  const toast = document.createElement("div");
+  toast.className = `app-toast ${tone}`;
+  toast.setAttribute("role", "status");
+  toast.innerHTML = `<span>${tone === "success" ? "✓" : "🔔"}</span><span>${message}</span>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add("visible"));
+  setTimeout(() => {
+    toast.classList.remove("visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 4200);
+}
+
+function switchPage(pageName) {
+  document.querySelectorAll(".menu-item").forEach((item) => item.classList.toggle("active", item.dataset.page === pageName));
+  document.querySelectorAll(".page-content").forEach((page) => page.classList.toggle("active", page.id === `${pageName}-page`));
+  if (pageName === "map") {
+    setTimeout(() => {
+      if (!map) initMap();
+      loadCleanupLocations();
+    }, 100);
+  }
+  if (pageName === "events") renderEvents();
+}
+
 function initMap() {
   if (map) return;
-
-  // Create map centered on default location
-  map = L.map("map").setView([39.9526, -75.1652], 13);
-
-  // Add OpenStreetMap tile layer
+  map = L.map("map").setView([DEMO_CENTER.lat, DEMO_CENTER.lon], 16);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18,
   }).addTo(map);
-
-  // Add user location marker when available
-  if (userLocation) {
-    L.marker([userLocation.lat, userLocation.lon], {
-      icon: L.icon({
-        iconUrl:
-          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxMCIgZmlsbD0iIzJiN2E5ZiIgZmlsbC1vcGFjaXR5PSIwLjMiLz48Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSI2IiBmaWxsPSIjMmI3YTlmIi8+PC9zdmc+",
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-      }),
-    })
-      .addTo(map)
-      .bindPopup("<strong>Your Location</strong>");
-  }
 }
 
-// Show full-page location overlay
-async function showLocationOverlay(location) {
-  const typeIcon =
-    {
-      ngo: "🤝",
-      charity: "❤️",
-      social_facility: "🏥",
-      community_centre: "🏛️",
-      shelter: "🏠",
-      park: "🌳",
-    }[location.type] || "📍";
-
-  const typeLabel = location.type.replace("_", " ");
-  const distanceText =
-    location.distance < 1
-      ? `${Math.round(location.distance * 1000)}m away`
-      : `${location.distance.toFixed(1)}km away`;
-
-  // Google Maps link
-  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${location.lat},${location.lon}`;
-
-  // Fetch real volunteer opportunities from VolunteerConnector API
-  console.log("📍 Fetching opportunities near your location:", userLocation);
-
-  const opportunities = await fetchOpportunitiesByLocation(
-    userLocation.lat,
-    userLocation.lon,
-    "volunteer cleanup environmental community",
-    25,
-  );
-
-  // Build opportunities HTML
-  let opportunitiesHTML = "";
-  if (opportunities.length > 0) {
-    opportunitiesHTML = `
-      <div class="popup-section-title">🌱 Volunteer Opportunities Near You</div>
-      <div class="popup-info-note">
-        These are volunteer opportunities in your area (not necessarily at this specific location)
-      </div>
-      <div class="opportunities-list">
-        ${opportunities
-          .slice(0, 3)
-          .map(
-            (opp) => `
-          <a href="${opp.url}" target="_blank" class="opportunity-card">
-            <div class="opportunity-title">${opp.title}</div>
-            <div class="opportunity-description">${opp.description}</div>
-            <div class="opportunity-location">📍 ${opp.location}</div>
-          </a>
-        `,
-          )
-          .join("")}
-      </div>
-    `;
-  } else {
-    // Fallback to search link if no opportunities found or API not configured
-    const volunteerLink = `https://www.volunteermatch.org/search?l=${encodeURIComponent(location.name + " " + (location.tags?.["addr:city"] || "Philadelphia"))}`;
-    opportunitiesHTML = `
-      <div class="popup-section-title">🌱 Volunteer for Cleanup</div>
-      <div class="popup-volunteer-info">
-        <div class="popup-volunteer-text">
-          Volunteer with <strong>${location.name}</strong>! Find opportunities to make a difference in your community through environmental and social impact work.
-        </div>
-      </div>
-      <div class="popup-links">
-        <a href="${volunteerLink}" target="_blank" class="popup-link">
-          <span>🤝</span> View Volunteer Opportunities
-        </a>
-      </div>
-    `;
-  }
-
-  const overlayHTML = `
-    <div class="location-overlay active" id="locationOverlay">
-      <div class="overlay-content">
-        <button class="overlay-close" onclick="closeLocationOverlay()">×</button>
-        <div class="popup-header">
-          <div class="popup-title">${location.name}</div>
-          <div class="popup-subtitle">
-            <span class="popup-detail-icon">${typeIcon}</span>
-            ${typeLabel} • ${distanceText}
-          </div>
-        </div>
-        <div class="popup-body">
-          <div class="popup-type">${typeLabel}</div>
-          
-          <div class="popup-detail">
-            <span class="popup-detail-icon">📍</span>
-            <span>${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}</span>
-          </div>
-          
-          <div class="popup-divider"></div>
-          
-          ${opportunitiesHTML}
-          
-          <div class="popup-divider"></div>
-          
-          <a href="${mapsLink}" target="_blank" class="popup-link secondary">
-            <span>🗺️</span> Get Directions
-          </a>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Remove existing overlay if any
-  const existing = document.getElementById("locationOverlay");
-  if (existing) {
-    existing.remove();
-  }
-
-  // Add new overlay to body
-  document.body.insertAdjacentHTML("beforeend", overlayHTML);
-
-  // Prevent body scroll when overlay is open
-  document.body.style.overflow = "hidden";
-
-  // Close on background click
-  document.getElementById("locationOverlay").addEventListener("click", (e) => {
-    if (e.target.classList.contains("location-overlay")) {
-      closeLocationOverlay();
-    }
-  });
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const radius = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-// Close location overlay
-function closeLocationOverlay() {
-  const overlay = document.getElementById("locationOverlay");
-  if (overlay) {
-    overlay.classList.remove("active");
-    setTimeout(() => {
-      overlay.remove();
-      document.body.style.overflow = "";
-    }, 300);
-  }
-}
-
-// Add marker to map with click handler for overlay
 function addMarker(location) {
-  const typeIcon =
-    {
-      ngo: "🤝",
-      charity: "❤️",
-      social_facility: "🏥",
-      community_centre: "🏛️",
-      shelter: "🏠",
-      park: "🌳",
-    }[location.type] || "📍";
-
-  // Create custom icon with color based on type
-  const markerColor =
-    {
-      ngo: "#e63946",
-      charity: "#d62828",
-      social_facility: "#2b7a9f",
-      community_centre: "#4f7942",
-      shelter: "#f77f00",
-      park: "#2d9c6f",
-    }[location.type] || "#52796f";
-
-  const customIcon = L.divIcon({
-    className: "custom-marker",
-    html: `<div style="background: ${markerColor}; width: 30px; height: 30px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;"><span style="transform: rotate(45deg); font-size: 16px;">${typeIcon}</span></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30],
-  });
-
+  const icon = location.type === "ngo" ? "🤝" : location.type === "school" ? "🏫" : "🏀";
   const marker = L.marker([location.lat, location.lon], {
-    icon: customIcon,
+    icon: L.divIcon({
+      className: "custom-marker",
+      html: `<div class="map-pin" aria-label="${location.name}">${icon}</div>`,
+      iconSize: [38, 38],
+      iconAnchor: [19, 38],
+    }),
   }).addTo(map);
-
-  // Show full-page overlay when marker is clicked
-  marker.on("click", async () => {
-    await showLocationOverlay(location);
-  });
-
-  location.marker = marker;
+  marker.on("click", () => showLocationOverlay(location));
   markers.push(marker);
-  return marker;
 }
 
-// Clear all markers from map
 function clearMarkers() {
   markers.forEach((marker) => map.removeLayer(marker));
   markers = [];
 }
 
-// Calculate distance between two coordinates (Haversine formula)
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Earth's radius in km
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  return R * c;
+function loadCleanupLocations() {
+  const content = document.getElementById("location-content");
+  if (!content) return;
+  clearMarkers();
+  currentLocations = PHILLY_DEMO_LOCATIONS.map((location) => ({
+    ...location,
+    distance: calculateDistance(DEMO_CENTER.lat, DEMO_CENTER.lon, location.lat, location.lon),
+  })).sort((a, b) => a.distance - b.distance);
+  currentLocations.forEach(addMarker);
+  content.innerHTML = `<div class="location-list">${currentLocations.map((location, index) => `
+    <button class="location-item" onclick="focusMarker(${index})">
+      <span class="location-icon">${location.type === "ngo" ? "🤝" : location.type === "school" ? "🏫" : "🏀"}</span>
+      <span class="location-info"><strong class="location-name">${location.name}</strong>
+      <span class="location-distance">${Math.round(location.distance * 1000)}m away · ${location.address}</span>
+      <span class="location-type">${state.slots[location.slotsKey]} slots left · ${location.event}</span></span>
+      <span class="location-arrow">→</span>
+    </button>`).join("")}</div>`;
+  const updated = document.querySelector("[data-last-updated]");
+  if (updated) updated.textContent = "Updated 2h ago";
 }
 
-// Helper function to get ZIP code from coordinates (reverse geocoding)
-async function getZipFromCoordinates(lat, lon) {
-  try {
-    console.log(`Getting ZIP code for coordinates: ${lat}, ${lon}`);
-    // Using Nominatim (OpenStreetMap) reverse geocoding - free and no API key needed
-    const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`,
-      {
-        headers: {
-          "User-Agent": "VolunteerApp/1.0", // Required by Nominatim
-        },
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error("Geocoding failed");
-    }
-
-    const data = await response.json();
-    console.log("Geocoding response:", data);
-
-    // Try to get US ZIP code from postcode field
-    const zip = data.address?.postcode || "";
-
-    // Check if it's a US ZIP code (5 digits, optionally with -#### extension)
-    const usZipRegex = /^\d{5}(-\d{4})?$/;
-    if (zip && usZipRegex.test(zip.split(" ")[0])) {
-      console.log(`Found US ZIP code: ${zip}`);
-      return zip.split(" ")[0]; // Return just the ZIP, remove any extensions
-    }
-
-    // If not US or no ZIP found, check country
-    const country = data.address?.country_code?.toLowerCase();
-    console.warn(
-      `Non-US location detected (${country}). Using user's location fallback.`,
-    );
-
-    // Use default US ZIP (Philadelphia) as fallback
-    console.log("Using fallback ZIP: 19107");
-    return "19107";
-  } catch (error) {
-    console.error("Error getting ZIP code:", error);
-    return "19107"; // Default fallback ZIP (Philadelphia)
-  }
+function focusMarker(index) {
+  const location = currentLocations[index];
+  if (!location) return;
+  map.setView([location.lat, location.lon], 17);
+  showLocationOverlay(location);
 }
 
-/**
- * Fetch volunteer opportunities from VolunteerConnector API
- * @param {string} zip - ZIP code to search in
- * @param {string} keyword - Search keyword (default: "cleanup")
- * @param {number} radius - Search radius in miles (optional)
- * @returns {Promise<Array>} Array of volunteer opportunities
- *
- * @example
- * // Basic usage with ZIP code
- * const opportunities = await fetchVolunteerOpportunities('19107');
- *
- * @example
- * // Custom keyword search
- * const parkOpps = await fetchVolunteerOpportunities('19107', 'park cleanup');
- *
- * @example
- * // With radius parameter
- * const nearbyOpps = await fetchVolunteerOpportunities('19107', 'environmental', 15);
- */
-async function fetchVolunteerOpportunities(
-  zip,
-  keyword = "cleanup",
-  radius = null,
-) {
-  try {
-    console.log("⚡ Fetching opportunities for ZIP:", zip);
+function showLocationOverlay(location) {
+  const signedUp = state.signedUp.includes(location.id);
+  const overlay = document.createElement("div");
+  overlay.className = "location-overlay active";
+  overlay.id = "locationOverlay";
+  overlay.innerHTML = `<div class="overlay-content" role="dialog" aria-modal="true" aria-labelledby="opportunity-title">
+    <button class="overlay-close" aria-label="Close opportunity details">×</button>
+    <div class="popup-header"><div class="popup-title" id="opportunity-title">${location.name}</div>
+    <div class="popup-subtitle">📍 ${location.event} · ${state.slots[location.slotsKey]} spots left</div></div>
+    <div class="popup-body"><div class="popup-type">Philadelphia demo event</div>
+    <div class="popup-detail"><span class="popup-detail-icon">📍</span><span>${location.address}</span></div>
+    <div class="popup-divider"></div><div class="popup-section-title">🌱 What you'll do</div>
+    <div class="popup-volunteer-info"><div class="popup-volunteer-text">${location.description}</div></div>
+    <div class="popup-section-title">Reward: +${location.points} points</div>
+    <div class="popup-links"><button class="popup-link signup-button ${signedUp ? "signed-up" : ""}" ${signedUp ? "disabled" : ""}>${signedUp ? "✓ You're signed up" : "🤝 Volunteer Here"}</button>
+    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location.address)}" target="_blank" rel="noreferrer" class="popup-link secondary"><span>🗺️</span> Get Directions</a></div></div></div>`;
+  document.getElementById("locationOverlay")?.remove();
+  document.body.appendChild(overlay);
+  document.body.style.overflow = "hidden";
+  overlay.querySelector(".overlay-close").addEventListener("click", closeLocationOverlay);
+  overlay.addEventListener("click", (event) => { if (event.target === overlay) closeLocationOverlay(); });
+  overlay.querySelector(".signup-button").addEventListener("click", () => signUpForEvent(location));
+}
 
-    // Build API URL - no country restriction
-    let apiUrl = `https://www.volunteerconnector.org/api/search/?q=${encodeURIComponent(keyword)}&zip=${zip}`;
+function closeLocationOverlay() {
+  document.getElementById("locationOverlay")?.remove();
+  document.body.style.overflow = "";
+}
 
-    // Add radius parameter if provided
-    if (radius) {
-      apiUrl += `&radius=${radius}`;
-    }
+function signUpForEvent(location) {
+  if (state.signedUp.includes(location.id) || state.slots[location.slotsKey] < 1) return;
+  state.signedUp.push(location.id);
+  state.slots[location.slotsKey] -= 1;
+  state.points += location.points;
+  state.cleanups += 1;
+  saveState();
+  closeLocationOverlay();
+  showToast(`You're signed up for ${location.event}! +${location.points} points`);
+  loadCleanupLocations();
+  setTimeout(() => showToast(`Level progress updated — ${state.points.toLocaleString()} points`, "info"), 900);
+}
 
-    console.log("🌐 API Request:", apiUrl);
-
-    // Fetch opportunities from VolunteerConnector API
-    const response = await fetch(apiUrl);
-
-    if (!response.ok) {
-      throw new Error(`VolunteerConnector API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("📦 API returned", data.results?.length || 0, "opportunities");
-
-    // Check if results exist
-    if (!data || !data.results || data.results.length === 0) {
-      console.log("No volunteer opportunities found");
-      return [];
-    }
-
-    // Transform and simplify the data (no filtering)
-    return data.results.map((opportunity) => {
-      // Truncate description to 150 characters
-      let description = opportunity.description || "No description available";
-      if (description.length > 150) {
-        description = description.substring(0, 147) + "...";
-      }
-
-      // Build location string from organization data (city + state if available)
-      let location = "Location TBD";
-      const org = opportunity.organization || {};
-
-      if (org.city && org.state) {
-        location = `${org.city}, ${org.state}`;
-      } else if (org.city) {
-        location = org.city;
-      } else if (org.location) {
-        location = org.location;
-      } else if (opportunity.location) {
-        location = opportunity.location;
-      }
-
-      return {
-        id:
-          opportunity.id ||
-          opportunity._id ||
-          `opp-${Date.now()}-${Math.random()}`,
-        title: opportunity.title || "Volunteer Opportunity",
-        description: description,
-        location: location,
-        url: opportunity.url || opportunity.link || "#",
-      };
+function renderEvents(filter = "all") {
+  const list = document.querySelector("#events-list");
+  if (!list) return;
+  const events = filter === "all" ? DEMO_EVENTS : DEMO_EVENTS.filter((event) => event.type === filter);
+  list.innerHTML = events.map((event) => {
+    const location = PHILLY_DEMO_LOCATIONS.find((item) => item.id === event.id);
+    const signedUp = state.signedUp.includes(event.id);
+    return `<article class="demo-event-card"><div class="demo-event-icon">${event.icon}</div><div class="demo-event-info"><span class="event-tag">${event.type}</span><h3>${event.title}</h3><p>${event.date} · ${event.place}</p><strong>+${event.points} pts · ${state.slots[event.id]} spots left</strong></div><button class="event-action ${signedUp ? "signed-up" : ""}" ${signedUp ? "disabled" : ""}>${signedUp ? "Joined" : "Join"}</button></article>`;
+  }).join("");
+  list.querySelectorAll(".event-action:not([disabled])").forEach((button, index) => {
+    button.addEventListener("click", () => {
+      const visibleEvents = filter === "all" ? DEMO_EVENTS : DEMO_EVENTS.filter((event) => event.type === filter);
+      signUpForEvent(PHILLY_DEMO_LOCATIONS.find((location) => location.id === visibleEvents[index].id));
+      renderEvents(filter);
     });
-  } catch (error) {
-    console.error("Error fetching volunteer opportunities:", error);
-    return []; // Return empty array on error
-  }
+  });
 }
 
-// Example usage with coordinates (converts to ZIP first)
-async function fetchOpportunitiesByLocation(
-  lat,
-  lon,
-  keyword = "cleanup",
-  radius = null,
-) {
-  console.log(
-    `fetchOpportunitiesByLocation called with: lat=${lat}, lon=${lon}, keyword=${keyword}, radius=${radius}`,
-  );
-  const zip = await getZipFromCoordinates(lat, lon);
-  console.log(`Fetching opportunities for ZIP: ${zip}`);
-  return await fetchVolunteerOpportunities(zip, keyword, radius);
+function initDemoAlert() {
+  if (sessionStorage.getItem("trash4impact-alert-shown")) return;
+  setTimeout(() => {
+    sessionStorage.setItem("trash4impact-alert-shown", "true");
+    showToast("New events near you — 3 Philly cleanups this weekend", "info");
+  }, 20000);
 }
 
-// Fetch cleanup locations using OpenStreetMap Overpass API
-async function fetchLocationsFromOSM(lat, lon, radius = 3000) {
-  console.log(
-    `Fetching locations around ${lat}, ${lon} with radius ${radius}m`,
-  );
-
-  const query = `
-    [out:json][timeout:15];
-    (
-      node["amenity"="social_facility"](around:${radius},${lat},${lon});
-      way["amenity"="social_facility"](around:${radius},${lat},${lon});
-      node["amenity"="community_centre"](around:${radius},${lat},${lon});
-      way["amenity"="community_centre"](around:${radius},${lat},${lon});
-      node["office"="ngo"](around:${radius},${lat},${lon});
-      way["office"="ngo"](around:${radius},${lat},${lon});
-      node["office"="charity"](around:${radius},${lat},${lon});
-      way["office"="charity"](around:${radius},${lat},${lon});
-      node["amenity"="shelter"](around:${radius},${lat},${lon});
-      way["amenity"="shelter"](around:${radius},${lat},${lon});
-      node["leisure"="park"](around:${radius},${lat},${lon});
-      way["leisure"="park"](around:${radius},${lat},${lon});
-    );
-    out center;
-  `;
-
-  const url = "https://overpass-api.de/api/interpreter";
-
-  // Add timeout to fetch request
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000); // 12 second timeout
-
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      body: query,
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log(`Received ${data.elements.length} locations from API`);
-    return data.elements;
-  } catch (error) {
-    clearTimeout(timeoutId);
-    if (error.name === "AbortError") {
-      console.error("Request timed out");
-      throw new Error("Request timed out - try again");
-    }
-    console.error("Fetch error:", error);
-    throw error;
-  }
-}
-
-// Process and display locations
-async function loadCleanupLocations() {
-  console.log("Loading cleanup locations...");
-  const contentDiv = document.getElementById("location-content");
-  contentDiv.innerHTML = `
-    <div class="loading-spinner">
-      <div class="spinner"></div>
-      <div>Finding nearby locations...</div>
-    </div>
-  `;
-
-  try {
-    // Get user location
-    const location = await getUserLocation();
-    console.log("Location obtained:", location);
-
-    // Update map center
-    if (map) {
-      map.setView([location.lat, location.lon], 13);
-      clearMarkers();
-    }
-
-    // Fetch locations from OpenStreetMap
-    console.log("Fetching from OSM API...");
-    const rawLocations = await fetchLocationsFromOSM(
-      location.lat,
-      location.lon,
-    );
-    console.log("Processing locations...");
-
-    // Process locations
-    const locations = rawLocations
-      .map((item) => {
-        const lat = item.lat || (item.center && item.center.lat);
-        const lon = item.lon || (item.center && item.center.lon);
-
-        if (!lat || !lon) return null;
-
-        const distance = calculateDistance(
-          location.lat,
-          location.lon,
-          lat,
-          lon,
-        );
-
-        const type =
-          item.tags.office === "ngo"
-            ? "ngo"
-            : item.tags.office === "charity"
-              ? "charity"
-              : item.tags.amenity === "social_facility"
-                ? "social_facility"
-                : item.tags.amenity === "community_centre"
-                  ? "community_centre"
-                  : item.tags.amenity === "shelter"
-                    ? "shelter"
-                    : item.tags.leisure === "park"
-                      ? "park"
-                      : "volunteer_location";
-
-        return {
-          name: item.tags.name || "Unnamed Location",
-          type: type,
-          distance: distance,
-          lat: lat,
-          lon: lon,
-          tags: item.tags,
-        };
-      })
-      .filter((item) => item !== null && item.name !== "Unnamed Location")
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 10); // Get top 10 closest locations
-
-    console.log(`Found ${locations.length} named locations`);
-
-    // Log locations for debugging
-    console.log(
-      "Locations that will be displayed:",
-      locations.map((loc) => loc.name),
-    );
-
-    // Display locations
-    if (locations.length === 0) {
-      contentDiv.innerHTML = `
-        <div class="error-message">
-          No cleanup locations found nearby. Showing sample locations.
-        </div>
-      `;
-      // Show fallback locations
-      showFallbackLocations(contentDiv, location);
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll(".menu-item").forEach((item) => item.addEventListener("click", () => switchPage(item.dataset.page)));
+  document.querySelector(".refresh-btn")?.addEventListener("click", loadCleanupLocations);
+  document.querySelectorAll(".event-filter").forEach((filter) => filter.addEventListener("click", () => {
+    document.querySelectorAll(".event-filter").forEach((item) => item.classList.remove("active"));
+    filter.classList.add("active");
+    renderEvents(filter.dataset.filter);
+  }));
+  document.querySelectorAll(".redeem-btn:not(.disabled)").forEach((button) => button.addEventListener("click", () => {
+    const card = button.closest(".reward-card");
+    const cost = Number(card.querySelector(".reward-cost").textContent.replace(/[^0-9]/g, ""));
+    const name = card.querySelector(".reward-name").textContent;
+    if (state.points < cost) {
+      showToast(`You need ${cost.toLocaleString()} points for ${name}.`, "info");
       return;
     }
-
-    // Add markers to map
-    locations.forEach((loc) => {
-      addMarker(loc);
-    });
-
-    const locationHTML = locations
-      .map((loc, index) => {
-        const typeIcon =
-          {
-            ngo: "🤝",
-            charity: "❤️",
-            social_facility: "🏥",
-            community_centre: "🏛️",
-            shelter: "🏠",
-            park: "🌳",
-          }[loc.type] || "📍";
-
-        const typeLabel = loc.type.replace("_", " ");
-        const distanceText =
-          loc.distance < 1
-            ? `${Math.round(loc.distance * 1000)}m away`
-            : `${loc.distance.toFixed(1)}km away`;
-
-        return `
-        <div class="location-item" onclick="focusMarker(${index})">
-          <div class="location-icon">${typeIcon}</div>
-          <div class="location-info">
-            <div class="location-name">${loc.name}</div>
-            <div class="location-distance">${distanceText}</div>
-            <div class="location-type">${typeLabel}</div>
-          </div>
-        </div>
-      `;
-      })
-      .join("");
-
-    contentDiv.innerHTML = `<div class="location-list">${locationHTML}</div>`;
-
-    // Store locations globally for click handlers
-    window.currentLocations = locations;
-    console.log("Locations loaded successfully");
-  } catch (error) {
-    console.error("Error loading locations:", error);
-    contentDiv.innerHTML = `
-      <div class="error-message">
-        ⚠️ ${error.message || "Unable to load locations"}. Showing sample locations.
-      </div>
-    `;
-    showFallbackLocations(
-      contentDiv,
-      userLocation || { lat: 39.9526, lon: -75.1652 },
-    );
-  }
-}
-
-// Show fallback locations when API fails
-function showFallbackLocations(contentDiv, location) {
-  const fallbackLocations = [
-    {
-      name: "American Red Cross - Southeastern PA",
-      type: "charity",
-      lat: 39.9526,
-      lon: -75.1652,
-      tags: { "addr:city": "Philadelphia" },
-    },
-    {
-      name: "Philabundance",
-      type: "charity",
-      lat: 39.9848,
-      lon: -75.1447,
-      tags: { "addr:city": "Philadelphia" },
-    },
-    {
-      name: "Habitat for Humanity Philadelphia",
-      type: "ngo",
-      lat: 39.9724,
-      lon: -75.1517,
-      tags: { "addr:city": "Philadelphia" },
-    },
-    {
-      name: "Project HOME",
-      type: "social_facility",
-      lat: 39.9551,
-      lon: -75.1605,
-      tags: { "addr:city": "Philadelphia" },
-    },
-  ];
-
-  fallbackLocations.forEach((loc) => {
-    loc.distance = calculateDistance(
-      location.lat,
-      location.lon,
-      loc.lat,
-      loc.lon,
-    );
-    if (map) addMarker(loc);
-  });
-
-  const locationHTML = fallbackLocations
-    .map((loc, index) => {
-      const typeIcon =
-        {
-          ngo: "🤝",
-          charity: "❤️",
-          social_facility: "🏥",
-          community_centre: "🏛️",
-          shelter: "🏠",
-          park: "🌳",
-        }[loc.type] || "📍";
-      const distanceText =
-        loc.distance < 1
-          ? `${Math.round(loc.distance * 1000)}m away`
-          : `${loc.distance.toFixed(1)}km away`;
-
-      return `
-      <div class="location-item">
-        <div class="location-icon">${typeIcon}</div>
-        <div class="location-info">
-          <div class="location-name">${loc.name}</div>
-          <div class="location-distance">${distanceText}</div>
-          <div class="location-type">${loc.type}</div>
-        </div>
-      </div>
-    `;
-    })
-    .join("");
-
-  contentDiv.innerHTML += `<div class="location-list">${locationHTML}</div>`;
-}
-
-// Focus on a marker when location item is clicked
-async function focusMarker(index) {
-  if (!window.currentLocations || !window.currentLocations[index]) return;
-
-  const loc = window.currentLocations[index];
-  if (map && loc.marker) {
-    map.setView([loc.lat, loc.lon], 15);
-    // Show the overlay instead of small popup
-    await showLocationOverlay(loc);
-    // Scroll to top to show map
-    document
-      .querySelector(".map-container")
-      .scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-}
-
-// Redeem button functionality
-document.addEventListener("DOMContentLoaded", () => {
-  // Add click handlers to all redeem buttons
-  const redeemButtons = document.querySelectorAll(".redeem-btn:not(.disabled)");
-
-  redeemButtons.forEach((button) => {
-    button.addEventListener("click", (e) => {
-      const rewardCard = e.target.closest(".reward-card");
-      const rewardName = rewardCard.querySelector(".reward-name").textContent;
-      const rewardValue = rewardCard.querySelector(".reward-value").textContent;
-      const rewardCost = rewardCard.querySelector(".reward-cost").textContent;
-
-      // Show confirmation message
-      const confirmed = confirm(
-        `Redeem ${rewardName} ${rewardValue} for ${rewardCost}?\n\n` +
-          `This will deduct points from your account and send the reward to your email.`,
-      );
-
-      if (confirmed) {
-        // Disable button and show success
-        button.textContent = "✓ Redeemed";
-        button.classList.add("disabled");
-        button.style.background = "#52796f";
-
-        // Show success message
-        setTimeout(() => {
-          alert(
-            `🎉 Success! Your ${rewardName} gift card has been sent to your email!`,
-          );
-        }, 300);
-      }
-    });
-  });
+    state.points -= cost;
+    saveState();
+    button.textContent = "✓ Redeemed";
+    button.classList.add("disabled");
+    showToast(`${name} reward redeemed — check your demo inbox!`);
+  }));
+  updateUserStats();
+  renderEvents();
+  initDemoAlert();
 });
+
+window.closeLocationOverlay = closeLocationOverlay;
+window.focusMarker = focusMarker;
+window.loadCleanupLocations = loadCleanupLocations;
