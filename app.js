@@ -262,7 +262,7 @@ function addMarker(location) {
   const marker = L.marker([location.lat, location.lon], {
     icon: L.divIcon({
       className: "custom-marker",
-      html: `<div class="map-pin" aria-label="${location.name}">${icon}</div>`,
+      html: `<div class="map-pin" aria-label="${location.name}"><span class="map-pin-icon">${icon}</span></div>`,
       iconSize: [38, 38],
       iconAnchor: [19, 38],
     }),
