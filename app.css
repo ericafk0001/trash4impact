@@ -1203,7 +1203,8 @@ button.location-item {
   transform: rotate(-45deg);
 }
 
-.map-pin::first-letter {
+.map-pin-icon {
+  display: block;
   transform: rotate(45deg);
 }
 
