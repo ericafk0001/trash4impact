@@ -242,6 +242,24 @@ function initDemoAlert() {
   }, 20000);
 }
 
+function initDemoModal() {
+  const modal = document.querySelector("#demo-modal");
+  if (!modal) return;
+  const closeButtons = modal.querySelectorAll(".demo-modal-close, .demo-modal-action");
+  const closeModal = () => {
+    modal.classList.add("is-closing");
+    setTimeout(() => modal.remove(), 200);
+  };
+  closeButtons.forEach((button) => button.addEventListener("click", closeModal));
+  modal.addEventListener("click", (event) => {
+    if (event.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && document.body.contains(modal)) closeModal();
+  });
+  modal.querySelector(".demo-modal-close").focus();
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll(".menu-item").forEach((item) => item.addEventListener("click", () => switchPage(item.dataset.page)));
   document.querySelector(".refresh-btn")?.addEventListener("click", loadCleanupLocations);
@@ -267,6 +285,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateUserStats();
   renderEvents();
   initDemoAlert();
+  initDemoModal();
 });
 
 window.closeLocationOverlay = closeLocationOverlay;

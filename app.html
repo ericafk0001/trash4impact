@@ -25,14 +25,13 @@
         <button class="menu-item" data-page="map">Map</button>
         <button class="menu-item" data-page="events">Events</button>
         <button class="menu-item" data-page="redeem">Redeem</button>
-        <a class="menu-home-link" href="index.html">← Site</a>
       </div>
-      <div class="demo-ribbon">DEMO BUILD · PHILADELPHIA</div>
 
       <div id="home-page" class="page-content active">
         <div class="header">
           <div class="header-left">
-            <div class="level-text">Level 14</div>
+            <div class="greeting">Hello, Janet!</div>
+            <div class="level-text">Level 80</div>
           </div>
           <div class="points-display" data-points>2,847 pts</div>
         </div>
@@ -43,7 +42,7 @@
             <div class="stat-label">Cleanups</div>
           </div>
           <div class="stat-card">
-            <div class="stat-value">#247</div>
+            <div class="stat-value">#7</div>
             <div class="stat-label">Global Rank</div>
           </div>
           <div class="stat-card featured">
@@ -57,41 +56,67 @@
         </div>
 
         <div class="rank-section">
-          <div class="rank-label">Next Rank: Platinum</div>
+          <div class="rank-label">Next Rank: Celestial</div>
           <div class="rank-icon">
-            <img src="raccoon gold.png" alt="" />
+            <img src="images/rank-icons/ruby.png" alt="ruby rank icon" />
           </div>
-          <div class="rank-percentage">67% Complete</div>
+          <div
+            class="rank-progress"
+            role="progressbar"
+            aria-label="Rank progress"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="67"
+          >
+            <div class="rank-progress-fill" style="width: 67%"></div>
+          </div>
+          <div class="rank-percentage">67/100 Points</div>
         </div>
-        <div class="upcoming-card">
-          <div><span class="eyebrow">UP NEXT</span><strong>PCDC Chinatown Cleanup</strong><span>Saturday · 9:00 AM · +300 pts</span></div>
-          <button class="small-action" onclick="document.querySelector('[data-page=map]').click()">View map →</button>
+        <div class="leaderboard-card">
+          <div>
+            <span class="eyebrow">LEADERBOARD</span>
+            <strong>See how you rank</strong>
+          </div>
+          <a class="small-action" href="leaderboard.html">
+            View leaderboard →
+          </a>
         </div>
       </div>
 
       <div id="map-page" class="page-content">
         <div class="map-container">
-          <div class="map-heading"><div><div class="map-header">Volunteer Opportunities Near You</div><span class="updated-label" data-last-updated>Updated 2h ago</span></div><span class="philly-pill">📍 Philadelphia</span></div>
-          <button class="refresh-btn">
-            🔄 Refresh Locations
-          </button>
+          <div class="map-heading">
+            <div>
+              <div class="map-header">Volunteer Opportunities Near You</div>
+              <span class="updated-label" data-last-updated
+                >Updated 2h ago</span
+              >
+            </div>
+            <span class="philly-pill">📍 Philadelphia</span>
+          </div>
+          <button class="refresh-btn">🔄 Refresh Locations</button>
           <div id="map"></div>
           <div id="location-content">
             <div class="loading-spinner">
               <div class="spinner"></div>
               <div>Finding nearby locations...</div>
             </div>
-
           </div>
         </div>
       </div>
 
       <div id="events-page" class="page-content">
-        <div class="events-app-header"><span class="eyebrow">DISCOVER</span><h2>Events near you</h2><p>Three ways to make an impact this weekend.</p></div>
+        <div class="events-app-header">
+          <span class="eyebrow">DISCOVER</span>
+          <h2>Events near you</h2>
+          <p>Three ways to make an impact this weekend.</p>
+        </div>
         <div class="event-filters" role="group" aria-label="Filter events">
           <button class="event-filter active" data-filter="all">All</button>
           <button class="event-filter" data-filter="park">Park</button>
-          <button class="event-filter" data-filter="community">Community</button>
+          <button class="event-filter" data-filter="community">
+            Community
+          </button>
         </div>
         <div id="events-list" class="demo-events-list"></div>
       </div>
@@ -201,6 +226,32 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <div
+      class="demo-modal"
+      id="demo-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="demo-modal-title"
+    >
+      <div class="demo-modal-content">
+        <button
+          class="demo-modal-close"
+          type="button"
+          aria-label="Close demo notice"
+        >
+          ×
+        </button>
+        <div class="demo-modal-icon" aria-hidden="true">✦</div>
+        <span class="eyebrow">DEMO BUILD</span>
+        <h2 id="demo-modal-title">You’re viewing a demo version</h2>
+        <p>
+          Explore the app experience with sample data. Some features and
+          interactions are simulated for this preview.
+        </p>
+        <button class="demo-modal-action" type="button">Continue to app</button>
       </div>
     </div>
 
