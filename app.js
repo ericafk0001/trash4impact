@@ -4,7 +4,14 @@ const DEFAULT_STATE = {
   points: 2847,
   cleanups: 127,
   signedUp: [],
-  slots: { pcdc: 4, facts: 6, crane: 8 },
+  slots: {
+    pcdc: 4,
+    facts: 6,
+    crane: 8,
+    churchofgrace: 12,
+    feastofjustice: 10,
+    miraclegardenworshipcenter: 2,
+  },
 };
 
 const PHILLY_DEMO_LOCATIONS = [
@@ -15,7 +22,8 @@ const PHILLY_DEMO_LOCATIONS = [
     lat: 39.9590125,
     lon: -75.15603,
     address: "1023 Callowhill St, Philadelphia, PA 19123",
-    description: "Help refresh the school garden and prep activity spaces for students.",
+    description:
+      "Help refresh the school garden and prep activity spaces for students.",
     event: "Saturday, 9:00 AM",
     points: 250,
     slotsKey: "facts",
@@ -27,7 +35,8 @@ const PHILLY_DEMO_LOCATIONS = [
     lat: 39.957634,
     lon: -75.153671,
     address: "301-305 N 9th St, Philadelphia, PA 19107",
-    description: "Join neighbors for a two-hour cleanup around Chinatown and the Night Market corridor.",
+    description:
+      "Join neighbors for a two-hour cleanup around Chinatown and the Night Market corridor.",
     event: "Saturday, 9:00 AM",
     points: 300,
     slotsKey: "pcdc",
@@ -39,17 +48,115 @@ const PHILLY_DEMO_LOCATIONS = [
     lat: 39.9575179,
     lon: -75.1557648,
     address: "1001 Vine St, Philadelphia, PA 19107",
-    description: "Support a community garden and help set up supplies for youth programming.",
+    description:
+      "Support a community garden and help set up supplies for youth programming.",
     event: "Sunday, 10:30 AM",
     points: 200,
     slotsKey: "crane",
   },
+  {
+    id: "churchofgrace",
+    name: "Church of Grace",
+    type: "church",
+    lat: 40.039035508458056,
+    lon: -75.0464257506085,
+    address: "3301 Wellington St, Philadelphia, PA 19149",
+    description:
+      "Support a local church community by helping with a cleanup and organizing supplies for their outreach programs.",
+    event: "Sunday, 3:00 PM",
+    points: 500,
+    slotsKey: "churchofgrace",
+  },
+  {
+    id: "feastofjustice",
+    name: "Feast of Justice",
+    type: "ngo",
+    lat: 40.03742768542679,
+    lon: -75.05243934425081,
+    address: "3101 Tyson Ave, Philadelphia, PA 19149",
+    description:
+      "Support a local nonprofit by helping hand out meals and organize supplies for those in need in the community. This is a great opportunity to give back and make a positive impact in the community.",
+    event: "Saturday, 12:00-2:00 PM",
+    points: 350,
+    slotsKey: "feastofjustice",
+  },
+  {
+    id: "miraclegardenworshipcenter",
+    name: "Miracle Garden Worship Center",
+    type: "church",
+    lat: 40.05791460736668,
+    lon: -75.06672086475251,
+    address: "1707 Shelmire Ave, Philadelphia, PA 19111",
+    description:
+      "Support a local church community by helping with IT services and organizing supplies for their english learning programs.",
+    event: "Sunday, 10:00 AM",
+    points: 200,
+    slotsKey: "miraclegardenworshipcenter",
+  },
 ];
 
+const LOCATION_ICONS = {
+  church: "⛪",
+  ngo: "🤝",
+  recreation: "🌳",
+  school: "🏫",
+};
+
 const DEMO_EVENTS = [
-  { id: "pcdc", icon: "🤝", title: "PCDC Chinatown Cleanup", type: "park", date: "Sat, Mar 7 · 9:00 AM", place: "301 N 9th St", points: 300 },
-  { id: "facts", icon: "🏫", title: "FACTS School Garden Day", type: "community", date: "Sat, Mar 7 · 9:00 AM", place: "1023 Callowhill St", points: 250 },
-  { id: "crane", icon: "🌳", title: "Crane Center Green Team", type: "park", date: "Sun, Mar 8 · 10:30 AM", place: "1001 Vine St", points: 200 },
+  {
+    id: "pcdc",
+    icon: "🤝",
+    title: "PCDC Chinatown Cleanup",
+    type: "park",
+    date: "Sat, Mar 7 · 9:00 AM",
+    place: "301 N 9th St",
+    points: 300,
+  },
+  {
+    id: "facts",
+    icon: "🏫",
+    title: "FACTS School Garden Day",
+    type: "community",
+    date: "Sat, Mar 7 · 9:00 AM",
+    place: "1023 Callowhill St",
+    points: 250,
+  },
+  {
+    id: "churchofgrace",
+    icon: "⛪",
+    title: "Church of Grace Community Service",
+    type: "community",
+    date: "Sun, Mar 8 · 3:00 PM",
+    place: "3301 Wellington St",
+    points: 500,
+  },
+  {
+    id: "crane",
+    icon: "🌳",
+    title: "Crane Center Green Team",
+    type: "park",
+    date: "Sun, Mar 8 · 10:30 AM",
+    place: "1001 Vine St",
+    points: 200,
+  },
+  {
+    id: "feastofjustice",
+    icon: "🤝",
+    title: "Feast of Justice Community Service",
+    type: "ngo",
+    date: "Sat, Mar 7 · 12:00-2:00 PM",
+    place: "3101 Tyson Ave",
+    points: 350,
+  },
+  {
+    id: "miraclegardenworshipcenter",
+    icon: "⛪",
+    title: "Miracle Garden Worship Center Community Service",
+    type: "church",
+    date: "Sun, Mar 8 · 10:00 AM",
+    place: "1707 Shelmire Ave",
+    points: 200,
+  },
 ];
 
 let state = loadState();
@@ -57,10 +164,20 @@ let map = null;
 let markers = [];
 let currentLocations = [];
 
+function getLocationIcon(type) {
+  return LOCATION_ICONS[type] || "📍";
+}
+
 function loadState() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-    return saved ? { ...DEFAULT_STATE, ...saved, slots: { ...DEFAULT_STATE.slots, ...saved.slots } } : { ...DEFAULT_STATE, slots: { ...DEFAULT_STATE.slots } };
+    return saved
+      ? {
+          ...DEFAULT_STATE,
+          ...saved,
+          slots: { ...DEFAULT_STATE.slots, ...saved.slots },
+        }
+      : { ...DEFAULT_STATE, slots: { ...DEFAULT_STATE.slots } };
   } catch (error) {
     console.warn("Unable to load demo state; starting fresh.", error);
     return { ...DEFAULT_STATE, slots: { ...DEFAULT_STATE.slots } };
@@ -99,8 +216,16 @@ function showToast(message, tone = "success") {
 }
 
 function switchPage(pageName) {
-  document.querySelectorAll(".menu-item").forEach((item) => item.classList.toggle("active", item.dataset.page === pageName));
-  document.querySelectorAll(".page-content").forEach((page) => page.classList.toggle("active", page.id === `${pageName}-page`));
+  document
+    .querySelectorAll(".menu-item")
+    .forEach((item) =>
+      item.classList.toggle("active", item.dataset.page === pageName),
+    );
+  document
+    .querySelectorAll(".page-content")
+    .forEach((page) =>
+      page.classList.toggle("active", page.id === `${pageName}-page`),
+    );
   if (pageName === "map") {
     setTimeout(() => {
       if (!map) initMap();
@@ -114,7 +239,8 @@ function initMap() {
   if (map) return;
   map = L.map("map").setView([DEMO_CENTER.lat, DEMO_CENTER.lon], 16);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     maxZoom: 18,
   }).addTo(map);
 }
@@ -123,12 +249,16 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
   const radius = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) ** 2;
   return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function addMarker(location) {
-  const icon = location.type === "ngo" ? "🤝" : location.type === "school" ? "🏫" : "🏀";
+  const icon = getLocationIcon(location.type);
   const marker = L.marker([location.lat, location.lon], {
     icon: L.divIcon({
       className: "custom-marker",
@@ -152,17 +282,26 @@ function loadCleanupLocations() {
   clearMarkers();
   currentLocations = PHILLY_DEMO_LOCATIONS.map((location) => ({
     ...location,
-    distance: calculateDistance(DEMO_CENTER.lat, DEMO_CENTER.lon, location.lat, location.lon),
+    distance: calculateDistance(
+      DEMO_CENTER.lat,
+      DEMO_CENTER.lon,
+      location.lat,
+      location.lon,
+    ),
   })).sort((a, b) => a.distance - b.distance);
   currentLocations.forEach(addMarker);
-  content.innerHTML = `<div class="location-list">${currentLocations.map((location, index) => `
+  content.innerHTML = `<div class="location-list">${currentLocations
+    .map(
+      (location, index) => `
     <button class="location-item" onclick="focusMarker(${index})">
-      <span class="location-icon">${location.type === "ngo" ? "🤝" : location.type === "school" ? "🏫" : "🏀"}</span>
+      <span class="location-icon">${getLocationIcon(location.type)}</span>
       <span class="location-info"><strong class="location-name">${location.name}</strong>
       <span class="location-distance">${Math.round(location.distance * 1000)}m away · ${location.address}</span>
       <span class="location-type">${state.slots[location.slotsKey]} slots left · ${location.event}</span></span>
       <span class="location-arrow">→</span>
-    </button>`).join("")}</div>`;
+    </button>`,
+    )
+    .join("")}</div>`;
   const updated = document.querySelector("[data-last-updated]");
   if (updated) updated.textContent = "Updated 2h ago";
 }
@@ -193,9 +332,15 @@ function showLocationOverlay(location) {
   document.getElementById("locationOverlay")?.remove();
   document.body.appendChild(overlay);
   document.body.style.overflow = "hidden";
-  overlay.querySelector(".overlay-close").addEventListener("click", closeLocationOverlay);
-  overlay.addEventListener("click", (event) => { if (event.target === overlay) closeLocationOverlay(); });
-  overlay.querySelector(".signup-button").addEventListener("click", () => signUpForEvent(location));
+  overlay
+    .querySelector(".overlay-close")
+    .addEventListener("click", closeLocationOverlay);
+  overlay.addEventListener("click", (event) => {
+    if (event.target === overlay) closeLocationOverlay();
+  });
+  overlay
+    .querySelector(".signup-button")
+    .addEventListener("click", () => signUpForEvent(location));
 }
 
 function closeLocationOverlay() {
@@ -204,34 +349,63 @@ function closeLocationOverlay() {
 }
 
 function signUpForEvent(location) {
-  if (state.signedUp.includes(location.id) || state.slots[location.slotsKey] < 1) return;
+  if (
+    state.signedUp.includes(location.id) ||
+    state.slots[location.slotsKey] < 1
+  )
+    return;
   state.signedUp.push(location.id);
   state.slots[location.slotsKey] -= 1;
   state.points += location.points;
   state.cleanups += 1;
   saveState();
   closeLocationOverlay();
-  showToast(`You're signed up for ${location.event}! +${location.points} points`);
+  showToast(
+    `You're signed up for ${location.event}! +${location.points} points`,
+  );
   loadCleanupLocations();
-  setTimeout(() => showToast(`Level progress updated — ${state.points.toLocaleString()} points`, "info"), 900);
+  setTimeout(
+    () =>
+      showToast(
+        `Level progress updated — ${state.points.toLocaleString()} points`,
+        "info",
+      ),
+    900,
+  );
 }
 
 function renderEvents(filter = "all") {
   const list = document.querySelector("#events-list");
   if (!list) return;
-  const events = filter === "all" ? DEMO_EVENTS : DEMO_EVENTS.filter((event) => event.type === filter);
-  list.innerHTML = events.map((event) => {
-    const location = PHILLY_DEMO_LOCATIONS.find((item) => item.id === event.id);
-    const signedUp = state.signedUp.includes(event.id);
-    return `<article class="demo-event-card"><div class="demo-event-icon">${event.icon}</div><div class="demo-event-info"><span class="event-tag">${event.type}</span><h3>${event.title}</h3><p>${event.date} · ${event.place}</p><strong>+${event.points} pts · ${state.slots[event.id]} spots left</strong></div><button class="event-action ${signedUp ? "signed-up" : ""}" ${signedUp ? "disabled" : ""}>${signedUp ? "Joined" : "Join"}</button></article>`;
-  }).join("");
-  list.querySelectorAll(".event-action:not([disabled])").forEach((button, index) => {
-    button.addEventListener("click", () => {
-      const visibleEvents = filter === "all" ? DEMO_EVENTS : DEMO_EVENTS.filter((event) => event.type === filter);
-      signUpForEvent(PHILLY_DEMO_LOCATIONS.find((location) => location.id === visibleEvents[index].id));
-      renderEvents(filter);
+  const events =
+    filter === "all"
+      ? DEMO_EVENTS
+      : DEMO_EVENTS.filter((event) => event.type === filter);
+  list.innerHTML = events
+    .map((event) => {
+      const location = PHILLY_DEMO_LOCATIONS.find(
+        (item) => item.id === event.id,
+      );
+      const signedUp = state.signedUp.includes(event.id);
+      return `<article class="demo-event-card"><div class="demo-event-icon">${getLocationIcon(location.type)}</div><div class="demo-event-info"><span class="event-tag">${event.type}</span><h3>${event.title}</h3><p>${event.date} · ${event.place}</p><strong>+${event.points} pts · ${state.slots[event.id]} spots left</strong></div><button class="event-action ${signedUp ? "signed-up" : ""}" ${signedUp ? "disabled" : ""}>${signedUp ? "Joined" : "Join"}</button></article>`;
+    })
+    .join("");
+  list
+    .querySelectorAll(".event-action:not([disabled])")
+    .forEach((button, index) => {
+      button.addEventListener("click", () => {
+        const visibleEvents =
+          filter === "all"
+            ? DEMO_EVENTS
+            : DEMO_EVENTS.filter((event) => event.type === filter);
+        signUpForEvent(
+          PHILLY_DEMO_LOCATIONS.find(
+            (location) => location.id === visibleEvents[index].id,
+          ),
+        );
+        renderEvents(filter);
+      });
     });
-  });
 }
 
 function initDemoAlert() {
@@ -245,12 +419,16 @@ function initDemoAlert() {
 function initDemoModal() {
   const modal = document.querySelector("#demo-modal");
   if (!modal) return;
-  const closeButtons = modal.querySelectorAll(".demo-modal-close, .demo-modal-action");
+  const closeButtons = modal.querySelectorAll(
+    ".demo-modal-close, .demo-modal-action",
+  );
   const closeModal = () => {
     modal.classList.add("is-closing");
     setTimeout(() => modal.remove(), 200);
   };
-  closeButtons.forEach((button) => button.addEventListener("click", closeModal));
+  closeButtons.forEach((button) =>
+    button.addEventListener("click", closeModal),
+  );
   modal.addEventListener("click", (event) => {
     if (event.target === modal) closeModal();
   });
@@ -261,27 +439,44 @@ function initDemoModal() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll(".menu-item").forEach((item) => item.addEventListener("click", () => switchPage(item.dataset.page)));
-  document.querySelector(".refresh-btn")?.addEventListener("click", loadCleanupLocations);
-  document.querySelectorAll(".event-filter").forEach((filter) => filter.addEventListener("click", () => {
-    document.querySelectorAll(".event-filter").forEach((item) => item.classList.remove("active"));
-    filter.classList.add("active");
-    renderEvents(filter.dataset.filter);
-  }));
-  document.querySelectorAll(".redeem-btn:not(.disabled)").forEach((button) => button.addEventListener("click", () => {
-    const card = button.closest(".reward-card");
-    const cost = Number(card.querySelector(".reward-cost").textContent.replace(/[^0-9]/g, ""));
-    const name = card.querySelector(".reward-name").textContent;
-    if (state.points < cost) {
-      showToast(`You need ${cost.toLocaleString()} points for ${name}.`, "info");
-      return;
-    }
-    state.points -= cost;
-    saveState();
-    button.textContent = "✓ Redeemed";
-    button.classList.add("disabled");
-    showToast(`${name} reward redeemed — check your demo inbox!`);
-  }));
+  document
+    .querySelectorAll(".menu-item")
+    .forEach((item) =>
+      item.addEventListener("click", () => switchPage(item.dataset.page)),
+    );
+  document
+    .querySelector(".refresh-btn")
+    ?.addEventListener("click", loadCleanupLocations);
+  document.querySelectorAll(".event-filter").forEach((filter) =>
+    filter.addEventListener("click", () => {
+      document
+        .querySelectorAll(".event-filter")
+        .forEach((item) => item.classList.remove("active"));
+      filter.classList.add("active");
+      renderEvents(filter.dataset.filter);
+    }),
+  );
+  document.querySelectorAll(".redeem-btn:not(.disabled)").forEach((button) =>
+    button.addEventListener("click", () => {
+      const card = button.closest(".reward-card");
+      const cost = Number(
+        card.querySelector(".reward-cost").textContent.replace(/[^0-9]/g, ""),
+      );
+      const name = card.querySelector(".reward-name").textContent;
+      if (state.points < cost) {
+        showToast(
+          `You need ${cost.toLocaleString()} points for ${name}.`,
+          "info",
+        );
+        return;
+      }
+      state.points -= cost;
+      saveState();
+      button.textContent = "✓ Redeemed";
+      button.classList.add("disabled");
+      showToast(`${name} reward redeemed — check your demo inbox!`);
+    }),
+  );
   updateUserStats();
   renderEvents();
   initDemoAlert();
