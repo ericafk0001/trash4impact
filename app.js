@@ -1,5 +1,6 @@
 const DEMO_CENTER = { lat: 39.9576, lon: -75.1548 };
 const STORAGE_KEY = "trash4impact-demo-state";
+const DEMO_MODAL_DISMISSED_KEY = "trash4impact-demo-modal-dismissed";
 const DEFAULT_STATE = {
   points: 2847,
   cleanups: 127,
@@ -419,10 +420,15 @@ function initDemoAlert() {
 function initDemoModal() {
   const modal = document.querySelector("#demo-modal");
   if (!modal) return;
+  if (localStorage.getItem(DEMO_MODAL_DISMISSED_KEY) === "true") {
+    modal.remove();
+    return;
+  }
   const closeButtons = modal.querySelectorAll(
     ".demo-modal-close, .demo-modal-action",
   );
   const closeModal = () => {
+    localStorage.setItem(DEMO_MODAL_DISMISSED_KEY, "true");
     modal.classList.add("is-closing");
     setTimeout(() => modal.remove(), 200);
   };
