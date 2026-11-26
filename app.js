@@ -217,16 +217,24 @@ function showToast(message, tone = "success") {
 }
 
 function switchPage(pageName) {
+  if (!document.getElementById(`${pageName}-page`)) return;
+
   document
-    .querySelectorAll(".menu-item")
-    .forEach((item) =>
-      item.classList.toggle("active", item.dataset.page === pageName),
-    );
+    .querySelectorAll(".menu-item[data-page]")
+    .forEach((item) => {
+      const isActive = item.dataset.page === pageName;
+      item.classList.toggle("active", isActive);
+      if (isActive) item.setAttribute("aria-current", "page");
+      else item.removeAttribute("aria-current");
+    });
   document
     .querySelectorAll(".page-content")
     .forEach((page) =>
       page.classList.toggle("active", page.id === `${pageName}-page`),
     );
+  if (window.location.hash !== `#${pageName}`) {
+    window.history.replaceState(null, "", `#${pageName}`);
+  }
   if (pageName === "map") {
     setTimeout(() => {
       if (!map) initMap();
@@ -445,8 +453,11 @@ function initDemoModal() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  const initialPage = window.location.hash.slice(1);
+  if (initialPage) switchPage(initialPage);
+
   document
-    .querySelectorAll(".menu-item")
+    .querySelectorAll("[data-page]")
     .forEach((item) =>
       item.addEventListener("click", () => switchPage(item.dataset.page)),
     );
@@ -487,6 +498,11 @@ document.addEventListener("DOMContentLoaded", () => {
   renderEvents();
   initDemoAlert();
   initDemoModal();
+});
+
+window.addEventListener("hashchange", () => {
+  const pageName = window.location.hash.slice(1);
+  if (document.getElementById(`${pageName}-page`)) switchPage(pageName);
 });
 
 window.closeLocationOverlay = closeLocationOverlay;

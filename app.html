@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Climate+Crisis&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link
@@ -20,12 +20,30 @@
   </head>
   <body>
     <div class="screen">
-      <div class="page-menu">
-        <button class="menu-item active" data-page="home">Home</button>
-        <button class="menu-item" data-page="map">Map</button>
-        <button class="menu-item" data-page="events">Events</button>
-        <button class="menu-item" data-page="redeem">Redeem</button>
-      </div>
+      <nav class="page-menu" aria-label="Main navigation">
+        <a class="sidebar-brand" href="index.html">
+          <img src="images/racoonicon.png" alt="" />
+          <span>Trash4Impact</span>
+        </a>
+        <button
+          class="menu-item active"
+          type="button"
+          data-page="home"
+          aria-current="page"
+        >
+          Home
+        </button>
+        <button class="menu-item" type="button" data-page="map">Map</button>
+        <button class="menu-item" type="button" data-page="events">
+          Events
+        </button>
+        <button class="menu-item" type="button" data-page="redeem">
+          Redeem
+        </button>
+        <button class="menu-item" type="button" data-page="leaderboard">
+          Leaderboard
+        </button>
+      </nav>
 
       <div id="home-page" class="page-content active">
         <div class="header">
@@ -56,7 +74,7 @@
         </div>
 
         <div class="rank-section">
-          <div class="rank-label">Next Rank: Celestial</div>
+          <div class="rank-label">Ruby</div>
           <div class="rank-icon">
             <img src="images/rank-icons/ruby.png" alt="ruby rank icon" />
           </div>
@@ -74,12 +92,11 @@
         </div>
         <div class="leaderboard-card">
           <div>
-            <span class="eyebrow">LEADERBOARD</span>
             <strong>See how you rank</strong>
           </div>
-          <a class="small-action" href="leaderboard.html">
+          <button class="small-action" type="button" data-page="leaderboard">
             View leaderboard →
-          </a>
+          </button>
         </div>
       </div>
 
@@ -107,7 +124,6 @@
 
       <div id="events-page" class="page-content">
         <div class="events-app-header">
-          <span class="eyebrow">DISCOVER</span>
           <h2>Events near you</h2>
           <p>Three ways to make an impact this weekend.</p>
         </div>
@@ -227,6 +243,210 @@
           </div>
         </div>
       </div>
+      <section
+        id="leaderboard-page"
+        class="page-content"
+        aria-labelledby="leaderboard-title"
+      >
+        <header class="leaderboard-page-header">
+          <h1 id="leaderboard-title">Leaderboard</h1>
+          <p>
+            Celebrate the volunteers making a difference in their communities.
+          </p>
+        </header>
+        <div class="app-leaderboard-list" aria-label="Global leaderboard">
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">1</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Jordan Lee
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Celestial"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Celestial rank"
+                >
+                  <img src="images/rank-icons/celestial.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">184 cleanups</span>
+            </div>
+            <span class="leaderboard-points">4,920 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">2</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Maya Patel
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Ruby"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Ruby rank"
+                >
+                  <img src="images/rank-icons/ruby.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">156 cleanups</span>
+            </div>
+            <span class="leaderboard-points">3,740 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">3</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Chris Morgan
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Ruby"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Ruby rank"
+                >
+                  <img src="images/rank-icons/ruby.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">143 cleanups</span>
+            </div>
+            <span class="leaderboard-points">3,210 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">4</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Sam Rivera
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">139 cleanups</span>
+            </div>
+            <span class="leaderboard-points">3,080 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">5</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Avery Brooks
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">132 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,965 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">6</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Taylor Kim
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">128 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,910 pts</span>
+          </article>
+          <article class="app-leaderboard-row current">
+            <span class="leaderboard-position">7</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Janet Mendoza
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">127 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,847 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">8</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Morgan Ellis
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">121 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,780 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">9</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Riley Chen
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">116 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,640 pts</span>
+          </article>
+          <article class="app-leaderboard-row">
+            <span class="leaderboard-position">10</span>
+            <div class="leaderboard-member">
+              <span class="leaderboard-name">
+                Casey Morgan
+                <span
+                  class="leaderboard-rank-icon"
+                  data-rank="Platinum"
+                  tabindex="0"
+                  role="img"
+                  aria-label="Platinum rank"
+                >
+                  <img src="images/rank-icons/platinum.png" alt="" />
+                </span>
+              </span>
+              <span class="leaderboard-cleanups">109 cleanups</span>
+            </div>
+            <span class="leaderboard-points">2,510 pts</span>
+          </article>
+        </div>
+      </section>
     </div>
 
     <div
@@ -245,7 +465,6 @@
           ×
         </button>
         <div class="demo-modal-icon" aria-hidden="true">✦</div>
-        <span class="eyebrow">DEMO BUILD</span>
         <h2 id="demo-modal-title">You’re viewing a demo version</h2>
         <p>
           Explore the app experience with sample data. Some features and
